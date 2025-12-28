@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Форма обратной связи - Задание 8</title>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script src="script.js"></script>
+    <div class="container">
+      <h1>Форма обратной связи</h1>
+      <p class="description">
+        Нажмите кнопку ниже, чтобы открыть форму обратной связи. Форма
+        открывается во всплывающем окне, поддерживает историю браузера,
+        сохраняет данные локально и отправляет их на сервер без перезагрузки
+        страницы.
+      </p>
+
+      <button class="open-btn" id="openFormBtn">
+        📩 Открыть форму обратной связи
+      </button>
+
+      <footer>
+        <p>© Разработка пользовательского Web-интерфейса | Задание 8 | 2025</p>
+      </footer>
+    </div>
+
+    <!-- Попап с формой -->
+    <div class="popup-overlay" id="popupOverlay">
+      <div class="popup-content">
+        <button class="close-btn" id="closePopupBtn">&times;</button>
+
+        <h2>Обратная связь</h2>
+
+        <div class="form-container">
+          <div class="form-scroll">
+            <form id="feedbackForm">
+              <div class="form-group">
+                <label for="fullName">ФИО *</label>
+                <input type="text" id="fullName" name="fullName" required />
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required />
+              </div>
+
+              <div class="form-group">
+                <label for="phone">Телефон</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  placeholder="+7 (999) 123-45-67"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="organization">Организация</label>
+                <input type="text" id="organization" name="organization" />
+              </div>
+
+              <div class="form-group">
+                <label for="message">Сообщение *</label>
+                <textarea id="message" name="message" required></textarea>
+              </div>
+
+              <div class="checkbox-group">
+                <input type="checkbox" id="agree" name="agree" required />
+                <label for="agree">
+                  Я согласен(а) с
+                  <a href="#" id="policyLink"
+                    >политикой обработки персональных данных</a
+                  >
+                  *
+                </label>
+              </div>
+            </form>
+          </div>
+
+          <div class="form-buttons">
+            <button
+              type="submit"
+              class="submit-btn"
+              id="submitBtn"
+              form="feedbackForm"
+            >
+              Отправить сообщение
+            </button>
+
+            <div class="message success" id="successMessage">
+              ✅ Сообщение успешно отправлено!
+            </div>
+
+            <div class="message error" id="errorMessage">
+              ❌ Произошла ошибка при отправке. Пожалуйста, попробуйте еще раз.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script></script>
+  </body>
+</html>
