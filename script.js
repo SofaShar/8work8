@@ -1,355 +1,406 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+const openFormBtn = document.getElementById("openFormBtn");
+const popupOverlay = document.getElementById("popupOverlay");
+const closePopupBtn = document.getElementById("closePopupBtn");
+const feedbackForm = document.getElementById("feedbackForm");
+const submitBtn = document.getElementById("submitBtn");
+const successMessage = document.getElementById("successMessage");
+const errorMessage = document.getElementById("errorMessage");
+const policyLink = document.getElementById("policyLink");
+const phoneInput = document.getElementById("phone");
+const body = document.body;
+
+// Ключ для LocalStorage
+const STORAGE_KEY = "feedbackFormData";
+
+// Флаг для отслеживания состояния формы
+let isPopupOpen = false;
+
+// Проверка размера экрана
+function isMobileDevice() {
+  return window.innerWidth <= 768 || window.innerHeight <= 600;
 }
 
-body {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+// Настройка формы под мобильные устройства
+function adjustFormForMobile() {
+  if (isMobileDevice()) {
+    const formScroll = document.querySelector(".form-scroll");
+    const popupContent = document.querySelector(".popup-content");
 
-.container {
-  max-width: 800px;
-  width: 100%;
-  text-align: center;
-}
+    // Фиксированная высота для мобильных устройств
+    const maxHeight = Math.min(window.innerHeight * 0.9, 700);
+    popupContent.style.maxHeight = `${maxHeight}px`;
 
-h1 {
-  color: #2c3e50;
-  margin-bottom: 10px;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-}
+    // Высота для области прокрутки
+    const headerHeight = document.querySelector("h2").offsetHeight;
+    const buttonsHeight = document.querySelector(".form-buttons").offsetHeight;
+    const padding = 30;
 
-.description {
-  color: #7f8c8d;
-  margin-bottom: 30px;
-  font-size: clamp(0.95rem, 2vw, 1.1rem);
-  line-height: 1.6;
-  padding: 0 10px;
-}
-
-.open-btn {
-  background: linear-gradient(135deg, #3498db, #2c3e50);
-  color: white;
-  border: none;
-  padding: clamp(14px, 3vw, 18px) clamp(30px, 5vw, 40px);
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.open-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(52, 152, 219, 0.4);
-  background: linear-gradient(135deg, #2980b9, #34495e);
-}
-
-.open-btn:active {
-  transform: translateY(-1px);
-}
-
-/* Стили для попапа */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 0;
-}
-
-.popup-content {
-  background: white;
-  border-radius: clamp(15px, 3vw, 20px);
-  width: 100%;
-  max-width: min(500px, 95vw);
-  max-height: min(90vh, 700px);
-  padding: 10px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-  position: relative;
-  animation: popupShow 0.4s ease-out;
-  display: flex;
-  flex-direction: column;
-}
-
-@keyframes popupShow {
-  from {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+    const scrollHeight = maxHeight - headerHeight - buttonsHeight - padding;
+    formScroll.style.maxHeight = `${Math.max(scrollHeight, 200)}px`;
   }
 }
 
-.close-btn {
-  position: absolute;
-  top: clamp(10px, 2vw, 20px);
-  right: clamp(10px, 2vw, 20px);
-  background: none;
-  border: none;
-  font-size: clamp(24px, 5vw, 28px);
-  color: #7f8c8d;
-  cursor: pointer;
-  width: clamp(35px, 7vw, 40px);
-  height: clamp(35px, 7vw, 40px);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-  z-index: 2;
-}
+// Показать попап
+function openPopup() {
+  popupOverlay.style.display = "flex";
+  body.classList.add("popup-open");
+  isPopupOpen = true;
 
-.close-btn:hover {
-  background: #f5f5f5;
-  color: #e74c3c;
-}
+  // Настраиваем форму для мобильных устройств
+  adjustFormForMobile();
 
-h2 {
-  color: #2c3e50;
-  margin-bottom: 5px;
-  font-size: clamp(1.4rem, 4vw, 1.8rem);
-  padding-right: 40px;
-}
-
-/* Стили формы */
-.form-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.form-scroll {
-  flex: 1;
-  padding-right: 5px;
-  margin-bottom: 15px;
-}
-
-.form-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.form-scroll::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 2px;
-}
-
-.form-scroll::-webkit-scrollbar-thumb {
-  background: #3498db;
-  border-radius: 2px;
-}
-
-.form-group {
-  margin-bottom: 5px;
-  text-align: left;
-}
-
-label {
-  display: block;
-  margin-bottom: clamp(6px, 1.5vw, 8px);
-  color: #34495e;
-  font-weight: 600;
-  font-size: clamp(0.85rem, 2vw, 0.95rem);
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 5px;
-  border: 2px solid #e0e0e0;
-  border-radius: clamp(10px, 2vw, 12px);
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
-  transition: all 0.3s;
-  background: #f9f9f9;
-}
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: #3498db;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-textarea {
-  resize: vertical;
-  max-height: 150px;
-}
-
-.checkbox-group {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: clamp(20px, 4vw, 25px);
-}
-
-.checkbox-group input {
-  width: auto;
-  margin-right: clamp(10px, 2vw, 12px);
-  margin-top: 3px;
-  flex-shrink: 0;
-}
-
-.checkbox-group label {
-  font-weight: normal;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  line-height: 1.5;
-}
-
-.checkbox-group a {
-  color: #3498db;
-  text-decoration: none;
-}
-
-.checkbox-group a:hover {
-  text-decoration: underline;
-}
-
-.form-buttons {
-  margin-top: auto;
-  padding-top: 10px;
-  flex-shrink: 0;
-}
-
-.submit-btn {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: white;
-  border: none;
-  padding: 10px;
-  font-size: clamp(1rem, 2.5vw, 1.1rem);
-  border-radius: clamp(10px, 2vw, 12px);
-  cursor: pointer;
-  width: 100%;
-  font-weight: bold;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
-  min-height: 40px;
-}
-
-.submit-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(46, 204, 113, 0.4);
-  background: linear-gradient(135deg, #27ae60, #219653);
-}
-
-.submit-btn:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Сообщения */
-.message {
-  padding: 5px;
-  border-radius: clamp(10px, 2vw, 12px);
-  margin-top: clamp(15px, 3vw, 20px);
-  display: none;
-  font-weight: 600;
-  text-align: center;
-  font-size: clamp(0.85rem, 2vw, 0.95rem);
-}
-
-.success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-/* Адаптация для маленьких экранов */
-@media (max-height: 600px) {
-  .popup-content {
-    max-height: 95vh;
-    padding: 15px;
+  // Изменяем URL с помощью History API
+  if (window.location.hash !== "#feedback-form") {
+    history.pushState({ formOpen: true }, "", "#feedback-form");
   }
 
-  .form-scroll {
-    max-height: 50vh;
-  }
+  // Загружаем сохраненные данные
+  loadFormData();
 
-  h2 {
-    font-size: 1.3rem;
-    margin-bottom: 12px;
-  }
+  // Фокусируемся на первом поле
+  setTimeout(() => {
+    document.getElementById("fullName").focus();
+  }, 300);
+}
 
-  .form-group {
-    margin-bottom: 12px;
-  }
+// Скрыть попап
+function closePopup() {
+  popupOverlay.style.display = "none";
+  body.classList.remove("popup-open");
+  isPopupOpen = false;
 
-  textarea {
-    min-height: 80px;
+  // Восстанавливаем оригинальный URL
+  if (window.location.hash === "#feedback-form") {
+    history.back();
   }
 }
 
-@media (max-width: 480px) {
-  body {
-    padding: 15px;
+// Обработчик кнопки "Назад" в браузере
+window.addEventListener("popstate", function (event) {
+  if (isPopupOpen && window.location.hash !== "#feedback-form") {
+    closePopup();
+  } else if (!isPopupOpen && window.location.hash === "#feedback-form") {
+    openPopup();
   }
+});
 
-  .popup-overlay {
-    padding: 10px;
+// Открытие формы по клику на кнопку
+openFormBtn.addEventListener("click", openPopup);
+
+// Закрытие формы по клику на крестик
+closePopupBtn.addEventListener("click", closePopup);
+
+// Закрытие формы по клику вне контента
+popupOverlay.addEventListener("click", function (event) {
+  if (event.target === popupOverlay) {
+    closePopup();
   }
+});
 
-  .popup-content {
-    padding: 15px;
-    border-radius: 12px;
-  }
+// Обработка ссылки на политику
+policyLink.addEventListener("click", function (e) {
+  e.preventDefault();
+  alert(
+    "Политика обработки персональных данных:\n\nМы собираем и храним ваши данные исключительно для обработки вашего запроса и не передаем их третьим лицам без вашего согласия.\n\nСрок хранения данных: 1 год.\n\nВы имеете право запросить удаление ваших данных в любое время."
+  );
+});
 
-  .description {
-    padding: 0 5px;
+// Сохранение данных формы в LocalStorage
+function saveFormData() {
+  const formData = {
+    fullName: document.getElementById("fullName").value,
+    email: document.getElementById("email").value,
+    phone: document.getElementById("phone").value,
+    organization: document.getElementById("organization").value,
+    message: document.getElementById("message").value,
+    agree: document.getElementById("agree").checked,
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+}
+
+// Загрузка данных из LocalStorage
+function loadFormData() {
+  const savedData = localStorage.getItem(STORAGE_KEY);
+
+  if (savedData) {
+    try {
+      const formData = JSON.parse(savedData);
+
+      document.getElementById("fullName").value = formData.fullName || "";
+      document.getElementById("email").value = formData.email || "";
+      document.getElementById("phone").value = formData.phone || "";
+      document.getElementById("organization").value =
+        formData.organization || "";
+      document.getElementById("message").value = formData.message || "";
+      document.getElementById("agree").checked = formData.agree || false;
+    } catch (e) {
+      console.error("Ошибка при загрузке данных:", e);
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }
 }
 
-@media (max-width: 360px) {
-  .popup-content {
-    padding: 12px;
-  }
-
-  input,
-  textarea {
-    padding: 10px 12px;
-    font-size: 0.9rem;
-  }
-
-  .submit-btn {
-    padding: 12px 15px;
-    font-size: 0.95rem;
-  }
+// Очистка данных формы
+function clearFormData() {
+  localStorage.removeItem(STORAGE_KEY);
+  feedbackForm.reset();
+  document.getElementById("agree").checked = false;
 }
 
-/* Отключение прокрутки при открытом попапе */
-body.popup-open {
-  overflow: hidden;
+// Автосохранение при изменении полей формы
+let saveTimeout;
+function debounceSave() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveFormData, 500);
 }
 
-footer {
-  margin-top: 40px;
-  color: #7f8c8d;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  text-align: center;
-  padding: 0 10px;
+document
+  .querySelectorAll(
+    '#feedbackForm input, #feedbackForm textarea, #feedbackForm input[type="checkbox"]'
+  )
+  .forEach((element) => {
+    element.addEventListener("input", debounceSave);
+    element.addEventListener("change", debounceSave);
+  });
+
+// ИСПРАВЛЕННАЯ МАСКА ДЛЯ ТЕЛЕФОНА
+function formatPhoneNumber(value) {
+  // Удаляем все нецифровые символы
+  const numbers = value.replace(/\D/g, "");
+
+  // Если номер пустой, возвращаем пустую строку
+  if (!numbers) return "";
+
+  // Оставляем только первые 11 цифр (российский номер)
+  const limitedNumbers = numbers.substring(0, 11);
+
+  // Форматируем номер
+  let formatted = "+7";
+
+  if (limitedNumbers.length > 1) {
+    formatted += " (" + limitedNumbers.substring(1, 4);
+  }
+  if (limitedNumbers.length >= 4) {
+    formatted += ") " + limitedNumbers.substring(4, 7);
+  }
+  if (limitedNumbers.length >= 7) {
+    formatted += "-" + limitedNumbers.substring(7, 9);
+  }
+  if (limitedNumbers.length >= 9) {
+    formatted += "-" + limitedNumbers.substring(9, 11);
+  }
+
+  return formatted;
 }
+
+// Обработчик ввода номера телефона
+phoneInput.addEventListener("input", function (e) {
+  const cursorPosition = e.target.selectionStart;
+  const oldValue = e.target.value;
+  const formattedValue = formatPhoneNumber(oldValue);
+
+  // Устанавливаем отформатированное значение
+  e.target.value = formattedValue;
+
+  // Восстанавливаем позицию курсора
+  const newCursorPosition = getNewCursorPosition(
+    oldValue,
+    formattedValue,
+    cursorPosition
+  );
+  e.target.setSelectionRange(newCursorPosition, newCursorPosition);
+
+  // Сохраняем данные
+  debounceSave();
+});
+
+// Функция для расчета новой позиции курсора
+function getNewCursorPosition(oldValue, newValue, oldCursorPos) {
+  // Если старая позиция в конце строки, ставим в конец новой строки
+  if (oldCursorPos >= oldValue.length) {
+    return newValue.length;
+  }
+
+  // Считаем сколько цифр до старой позиции курсора
+  const digitsBeforeCursor = oldValue
+    .substring(0, oldCursorPos)
+    .replace(/\D/g, "").length;
+
+  // Ищем позицию в новой строке после N цифр
+  let digitCount = 0;
+  for (let i = 0; i < newValue.length; i++) {
+    if (/\d/.test(newValue[i])) {
+      digitCount++;
+    }
+    if (digitCount >= digitsBeforeCursor) {
+      // Возвращаем позицию после этой цифры
+      return i + 1;
+    }
+  }
+
+  return newValue.length;
+}
+
+// Обработчик вставки текста (Ctrl+V)
+phoneInput.addEventListener("paste", function (e) {
+  e.preventDefault();
+  const pastedText = (e.clipboardData || window.clipboardData).getData("text");
+  const numbers = pastedText.replace(/\D/g, "");
+
+  if (numbers) {
+    // Если вставлены только цифры, начинающиеся с 7 или 8, заменяем на 7
+    let cleanNumbers = numbers;
+    if (cleanNumbers.startsWith("8")) {
+      cleanNumbers = "7" + cleanNumbers.substring(1);
+    }
+
+    // Форматируем и вставляем
+    const formatted = formatPhoneNumber(cleanNumbers);
+
+    // Заменяем текущее значение
+    this.value = formatted;
+
+    // Ставим курсор в конец
+    setTimeout(() => {
+      this.setSelectionRange(formatted.length, formatted.length);
+    }, 0);
+
+    // Сохраняем данные
+    debounceSave();
+  }
+});
+
+// Обработка клавиш Backspace и Delete для корректного удаления
+phoneInput.addEventListener("keydown", function (e) {
+  // Запоминаем позицию курсора перед удалением
+  if (e.key === "Backspace" || e.key === "Delete") {
+    const cursorPos = this.selectionStart;
+    const selectionLength = this.selectionEnd - this.selectionStart;
+
+    // Если есть выделение, удаляем его
+    if (selectionLength > 0) {
+      e.preventDefault();
+
+      // Удаляем выделенные символы
+      const value = this.value;
+      const before = value.substring(0, this.selectionStart);
+      const after = value.substring(this.selectionEnd);
+      const newValue = before + after;
+
+      // Форматируем новое значение
+      const formatted = formatPhoneNumber(newValue);
+      this.value = formatted;
+
+      // Устанавливаем курсор на место первого удаленного символа
+      this.setSelectionRange(cursorPos, cursorPos);
+
+      // Сохраняем данные
+      debounceSave();
+    }
+  }
+});
+
+// Обработка отправки формы
+feedbackForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  // Показать состояние загрузки
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Отправка...";
+
+  // Скрыть предыдущие сообщения
+  successMessage.style.display = "none";
+  errorMessage.style.display = "none";
+
+  // Собираем данные формы
+  const formData = new FormData(feedbackForm);
+  const data = Object.fromEntries(formData);
+
+  try {
+    // Используем Formspree как бекэнд
+    // ВАЖНО: Замените этот URL на свой от Formspree
+    const response = await fetch("https://formspree.io/f/mzbnegjl", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.ok) {
+      // Успешная отправка
+      successMessage.style.display = "block";
+      successMessage.textContent = "✅ Сообщение успешно отправлено!";
+
+      // Очищаем форму и LocalStorage
+      clearFormData();
+
+      // Закрываем попап через 2 секунды
+      setTimeout(() => {
+        if (isPopupOpen) {
+          closePopup();
+        }
+      }, 2000);
+    } else {
+      throw new Error(result.error || "Ошибка сервера");
+    }
+  } catch (error) {
+    // Ошибка отправки
+    console.error("Ошибка отправки формы:", error);
+    errorMessage.style.display = "block";
+    errorMessage.textContent =
+      "❌ Ошибка: " + (error.message || "Неизвестная ошибка");
+  } finally {
+    // Восстанавливаем кнопку
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Отправить сообщение";
+  }
+});
+
+// Обработка клавиши Escape для закрытия формы
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && isPopupOpen) {
+    closePopup();
+  }
+});
+
+// Изменение размера при ресайзе окна
+let resizeTimeout;
+window.addEventListener("resize", function () {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (isPopupOpen) {
+      adjustFormForMobile();
+    }
+  }, 100);
+});
+
+// Инициализация при загрузке страницы
+window.addEventListener("DOMContentLoaded", function () {
+  // Проверяем, если URL уже содержит хэш формы
+  if (window.location.hash === "#feedback-form") {
+    setTimeout(openPopup, 100);
+  }
+
+  // Загружаем данные при загрузке страницы
+  loadFormData();
+});
+
+// Предотвращение зума на iOS при фокусе
+document.querySelectorAll("input, textarea").forEach((element) => {
+  element.addEventListener("focus", function () {
+    if (isMobileDevice()) {
+      this.style.fontSize = "16px";
+    }
+  });
+
+  element.addEventListener("blur", function () {
+    if (isMobileDevice()) {
+      this.style.fontSize = "";
+    }
+  });
+});
