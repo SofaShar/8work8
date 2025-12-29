@@ -1,303 +1,355 @@
-const openFormBtn = document.getElementById("openFormBtn");
-const popupOverlay = document.getElementById("popupOverlay");
-const closePopupBtn = document.getElementById("closePopupBtn");
-const feedbackForm = document.getElementById("feedbackForm");
-const submitBtn = document.getElementById("submitBtn");
-const successMessage = document.getElementById("successMessage");
-const errorMessage = document.getElementById("errorMessage");
-const policyLink = document.getElementById("policyLink");
-const body = document.body;
-
-// Ключ для LocalStorage
-const STORAGE_KEY = "feedbackFormData";
-
-// Флаг для отслеживания состояния формы
-let isPopupOpen = false;
-
-// Проверка размера экрана
-function isMobileDevice() {
-  return window.innerWidth <= 768 || window.innerHeight <= 600;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-// Настройка формы под мобильные устройства
-function adjustFormForMobile() {
-  if (isMobileDevice()) {
-    const formScroll = document.querySelector(".form-scroll");
-    const popupContent = document.querySelector(".popup-content");
-
-    // Фиксированная высота для мобильных устройств
-    const maxHeight = Math.min(window.innerHeight * 0.9, 700);
-    popupContent.style.maxHeight = `${maxHeight}px`;
-
-    // Высота для области прокрутки
-    const headerHeight = document.querySelector("h2").offsetHeight;
-    const buttonsHeight = document.querySelector(".form-buttons").offsetHeight;
-    const padding = 30;
-
-    const scrollHeight = maxHeight - headerHeight - buttonsHeight - padding;
-    formScroll.style.maxHeight = `${Math.max(scrollHeight, 200)}px`;
-  }
+body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-// Показать попап
-function openPopup() {
-  popupOverlay.style.display = "flex";
-  body.classList.add("popup-open");
-  isPopupOpen = true;
-
-  // Настраиваем форму для мобильных устройств
-  adjustFormForMobile();
-
-  // Изменяем URL с помощью History API
-  if (window.location.hash !== "#feedback-form") {
-    history.pushState({ formOpen: true }, "", "#feedback-form");
-  }
-
-  // Загружаем сохраненные данные
-  loadFormData();
-
-  // Фокусируемся на первом поле
-  setTimeout(() => {
-    document.getElementById("fullName").focus();
-  }, 300);
+.container {
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
 }
 
-// Скрыть попап
-function closePopup() {
-  popupOverlay.style.display = "none";
-  body.classList.remove("popup-open");
-  isPopupOpen = false;
-
-  // Восстанавливаем оригинальный URL
-  if (window.location.hash === "#feedback-form") {
-    history.back();
-  }
+h1 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
 }
 
-// Обработчик кнопки "Назад" в браузере
-window.addEventListener("popstate", function (event) {
-  if (isPopupOpen && window.location.hash !== "#feedback-form") {
-    closePopup();
-  } else if (!isPopupOpen && window.location.hash === "#feedback-form") {
-    openPopup();
-  }
-});
-
-// Открытие формы по клику на кнопку
-openFormBtn.addEventListener("click", openPopup);
-
-// Закрытие формы по клику на крестик
-closePopupBtn.addEventListener("click", closePopup);
-
-// Закрытие формы по клику вне контента
-popupOverlay.addEventListener("click", function (event) {
-  if (event.target === popupOverlay) {
-    closePopup();
-  }
-});
-
-// Обработка ссылки на политику
-policyLink.addEventListener("click", function (e) {
-  e.preventDefault();
-  alert(
-    "Политика обработки персональных данных:\n\nМы собираем и храним ваши данные исключительно для обработки вашего запроса и не передаем их третьим лицам без вашего согласия.\n\nСрок хранения данных: 1 год.\n\nВы имеете право запросить удаление ваших данных в любое время."
-  );
-});
-
-// Сохранение данных формы в LocalStorage
-function saveFormData() {
-  const formData = {
-    fullName: document.getElementById("fullName").value,
-    email: document.getElementById("email").value,
-    phone: document.getElementById("phone").value,
-    organization: document.getElementById("organization").value,
-    message: document.getElementById("message").value,
-    agree: document.getElementById("agree").checked,
-  };
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+.description {
+  color: #7f8c8d;
+  margin-bottom: 30px;
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  line-height: 1.6;
+  padding: 0 10px;
 }
 
-// Загрузка данных из LocalStorage
-function loadFormData() {
-  const savedData = localStorage.getItem(STORAGE_KEY);
+.open-btn {
+  background: linear-gradient(135deg, #3498db, #2c3e50);
+  color: white;
+  border: none;
+  padding: clamp(14px, 3vw, 18px) clamp(30px, 5vw, 40px);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+  font-weight: bold;
+  letter-spacing: 1px;
+}
 
-  if (savedData) {
-    try {
-      const formData = JSON.parse(savedData);
+.open-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(52, 152, 219, 0.4);
+  background: linear-gradient(135deg, #2980b9, #34495e);
+}
 
-      document.getElementById("fullName").value = formData.fullName || "";
-      document.getElementById("email").value = formData.email || "";
-      document.getElementById("phone").value = formData.phone || "";
-      document.getElementById("organization").value =
-        formData.organization || "";
-      document.getElementById("message").value = formData.message || "";
-      document.getElementById("agree").checked = formData.agree || false;
-    } catch (e) {
-      console.error("Ошибка при загрузке данных:", e);
-      // Если данные повреждены, удаляем их
-      localStorage.removeItem(STORAGE_KEY);
-    }
+.open-btn:active {
+  transform: translateY(-1px);
+}
+
+/* Стили для попапа */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 0;
+}
+
+.popup-content {
+  background: white;
+  border-radius: clamp(15px, 3vw, 20px);
+  width: 100%;
+  max-width: min(500px, 95vw);
+  max-height: min(90vh, 700px);
+  padding: 10px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: popupShow 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes popupShow {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-// Очистка данных формы
-function clearFormData() {
-  // Сначала очищаем LocalStorage
-  localStorage.removeItem(STORAGE_KEY);
-
-  // Затем очищаем форму
-  feedbackForm.reset();
-
-  // Явно сбрасываем чекбокс
-  document.getElementById("agree").checked = false;
+.close-btn {
+  position: absolute;
+  top: clamp(10px, 2vw, 20px);
+  right: clamp(10px, 2vw, 20px);
+  background: none;
+  border: none;
+  font-size: clamp(24px, 5vw, 28px);
+  color: #7f8c8d;
+  cursor: pointer;
+  width: clamp(35px, 7vw, 40px);
+  height: clamp(35px, 7vw, 40px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  z-index: 2;
 }
 
-// Автосохранение при изменении полей формы
-let saveTimeout;
-function debounceSave() {
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(saveFormData, 500);
+.close-btn:hover {
+  background: #f5f5f5;
+  color: #e74c3c;
 }
 
-document
-  .querySelectorAll(
-    '#feedbackForm input, #feedbackForm textarea, #feedbackForm input[type="checkbox"]'
-  )
-  .forEach((element) => {
-    element.addEventListener("input", debounceSave);
-    element.addEventListener("change", debounceSave);
-  });
+h2 {
+  color: #2c3e50;
+  margin-bottom: 5px;
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  padding-right: 40px;
+}
 
-// Обработка отправки формы
-feedbackForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
+/* Стили формы */
+.form-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 
-  // Показать состояние загрузки
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Отправка...";
+.form-scroll {
+  flex: 1;
+  padding-right: 5px;
+  margin-bottom: 15px;
+}
 
-  // Скрыть предыдущие сообщения
-  successMessage.style.display = "none";
-  errorMessage.style.display = "none";
+.form-scroll::-webkit-scrollbar {
+  width: 4px;
+}
 
-  // Собираем данные формы
-  const formData = new FormData(feedbackForm);
-  const data = Object.fromEntries(formData);
+.form-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
 
-  try {
-    // Используем Formspree как бекэнд
-    // ВАЖНО: Замените этот URL на свой от Formspree
-    const response = await fetch("https://formspree.io/f/mzbnegjl", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+.form-scroll::-webkit-scrollbar-thumb {
+  background: #3498db;
+  border-radius: 2px;
+}
 
-    const result = await response.json();
+.form-group {
+  margin-bottom: 5px;
+  text-align: left;
+}
 
-    if (response.ok && result.ok) {
-      // Успешная отправка
-      successMessage.style.display = "block";
-      successMessage.textContent = "✅ Сообщение успешно отправлено!";
+label {
+  display: block;
+  margin-bottom: clamp(6px, 1.5vw, 8px);
+  color: #34495e;
+  font-weight: 600;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+}
 
-      // Очищаем форму и LocalStorage
-      clearFormData();
+input,
+textarea {
+  width: 100%;
+  padding: 5px;
+  border: 2px solid #e0e0e0;
+  border-radius: clamp(10px, 2vw, 12px);
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  transition: all 0.3s;
+  background: #f9f9f9;
+}
 
-      // Закрываем попап через 2 секунды
-      setTimeout(() => {
-        if (isPopupOpen) {
-          closePopup();
-        }
-      }, 2000);
-    } else {
-      throw new Error(result.error || "Ошибка сервера");
-    }
-  } catch (error) {
-    // Ошибка отправки
-    console.error("Ошибка отправки формы:", error);
-    errorMessage.style.display = "block";
-    errorMessage.textContent =
-      "❌ Ошибка: " + (error.message || "Неизвестная ошибка");
-  } finally {
-    // Восстанавливаем кнопку
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Отправить сообщение";
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  max-height: 150px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: clamp(20px, 4vw, 25px);
+}
+
+.checkbox-group input {
+  width: auto;
+  margin-right: clamp(10px, 2vw, 12px);
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.checkbox-group label {
+  font-weight: normal;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  line-height: 1.5;
+}
+
+.checkbox-group a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.checkbox-group a:hover {
+  text-decoration: underline;
+}
+
+.form-buttons {
+  margin-top: auto;
+  padding-top: 10px;
+  flex-shrink: 0;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  border-radius: clamp(10px, 2vw, 12px);
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
+  min-height: 40px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(46, 204, 113, 0.4);
+  background: linear-gradient(135deg, #27ae60, #219653);
+}
+
+.submit-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Сообщения */
+.message {
+  padding: 5px;
+  border-radius: clamp(10px, 2vw, 12px);
+  margin-top: clamp(15px, 3vw, 20px);
+  display: none;
+  font-weight: 600;
+  text-align: center;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+}
+
+.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-height: 600px) {
+  .popup-content {
+    max-height: 95vh;
+    padding: 15px;
   }
-});
 
-// Обработка клавиши Escape для закрытия формы
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Escape" && isPopupOpen) {
-    closePopup();
-  }
-});
-
-// Изменение размера при ресайзе окна
-let resizeTimeout;
-window.addEventListener("resize", function () {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(() => {
-    if (isPopupOpen) {
-      adjustFormForMobile();
-    }
-  }, 100);
-});
-
-// Инициализация при загрузке страницы
-window.addEventListener("DOMContentLoaded", function () {
-  // Проверяем, если URL уже содержит хэш формы
-  if (window.location.hash === "#feedback-form") {
-    // Небольшая задержка для корректного отображения
-    setTimeout(openPopup, 100);
+  .form-scroll {
+    max-height: 50vh;
   }
 
-  // Загружаем данные при загрузке страницы
-  loadFormData();
-});
-
-// Валидация номера телефона
-document.getElementById("phone").addEventListener("input", function (e) {
-  let value = e.target.value.replace(/\D/g, "");
-
-  if (value.length > 0) {
-    if (!value.startsWith("7") && value.length > 0) {
-      value = "7" + value;
-    }
-
-    let formatted = "+7";
-    if (value.length > 1) {
-      formatted += " (" + value.substring(1, 4);
-    }
-    if (value.length >= 4) {
-      formatted += ") " + value.substring(4, 7);
-    }
-    if (value.length >= 7) {
-      formatted += "-" + value.substring(7, 9);
-    }
-    if (value.length >= 9) {
-      formatted += "-" + value.substring(9, 11);
-    }
-
-    e.target.value = formatted;
+  h2 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
   }
-});
 
-// Предотвращение зума на iOS при фокусе
-document.querySelectorAll("input, textarea").forEach((element) => {
-  element.addEventListener("focus", function () {
-    if (isMobileDevice()) {
-      // На iOS это помогает предотвратить зум
-      this.style.fontSize = "16px";
-    }
-  });
+  .form-group {
+    margin-bottom: 12px;
+  }
 
-  element.addEventListener("blur", function () {
-    if (isMobileDevice()) {
-      this.style.fontSize = "";
-    }
-  });
-});
+  textarea {
+    min-height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 15px;
+  }
+
+  .popup-overlay {
+    padding: 10px;
+  }
+
+  .popup-content {
+    padding: 15px;
+    border-radius: 12px;
+  }
+
+  .description {
+    padding: 0 5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .popup-content {
+    padding: 12px;
+  }
+
+  input,
+  textarea {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .submit-btn {
+    padding: 12px 15px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Отключение прокрутки при открытом попапе */
+body.popup-open {
+  overflow: hidden;
+}
+
+footer {
+  margin-top: 40px;
+  color: #7f8c8d;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  text-align: center;
+  padding: 0 10px;
+}
